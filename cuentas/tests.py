@@ -39,6 +39,12 @@ class PruebasUsuarioPersonalizado(TestCase):
 
         self.assertIsNone(usuario.edad)
 
+    def test_registro_con_bootstrap(self):
+        respuesta = self.client.get(reverse("registro"))
+        self.assertContains(respuesta, 'bootstrap.min.css')
+        self.assertContains(respuesta, 'form-control')
+        
+
 
 class PruebasRegistro(TestCase):
     def test_url_existe_en_ubicacion_correcta(self):
