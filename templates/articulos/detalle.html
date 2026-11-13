@@ -1,0 +1,23 @@
+<!-- templates/articulos/detalle.html -->
+{% extends "base.html" %}
+
+{% block titulo %}{{ articulo.titulo }}{% endblock titulo %}
+
+{% block contenido %}
+  <article>
+    <h1>{{ articulo.titulo }}</h1>
+    <p class="text-body-secondary">
+      Por {{ articulo.autor.username }} · {{ articulo.fecha|date:"j \d\e F \d\e Y, H:i"|lower }}
+    </p>
+    <p>{{ articulo.cuerpo|linebreaksbr }}</p>
+  </article>
+
+  {% if user == articulo.autor %}
+    <div class="mb-4">
+      <a class="btn btn-outline-primary" href="{% url 'articulo_editar' articulo.pk %}">Editar</a>
+      <a class="btn btn-outline-danger" href="{% url 'articulo_eliminar' articulo.pk %}">Eliminar</a>
+    </div>
+  {% endif %}
+
+  <p><a href="{% url 'articulo_lista' %}">Volver a los artículos</a></p>
+{% endblock contenido %}
