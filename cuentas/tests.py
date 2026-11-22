@@ -5,6 +5,7 @@ from django.contrib.auth import get_user_model
 from django.core import mail
 from django.urls import reverse
 from django.test import TestCase
+from django.conf import settings
 
 
 class PruebasUsuarioPersonalizado(TestCase):
@@ -167,3 +168,11 @@ class PruebasContrasena(TestCase):
         self.assertRedirects(respuesta, reverse("password_reset_complete"))
         self.usuario.refresh_from_db()
         self.assertTrue(self.usuario.check_password("Nueva-clave-2026"))
+
+
+    def test_correo_personalizado(self):
+        self.client.post(reverse("password_reset"), {"email": "ana@ejemplo.mx"})
+        correo = mail.outbox[0]
+        self.assertEqual(correo.subject, "Recupera tu contraseña del Periódico")
+        self.assertIn("Hola, ana:", correo.body)
+        self.assertEqual(correo.from_email, settings.DEFAULT_FROM_EMAIL)

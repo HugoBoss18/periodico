@@ -145,13 +145,17 @@ CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[])
 CRISPY_ALLOW_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 
+# Correo
 EMAIL_BACKEND = env.str(
-    "EMAIL_BACKEND",
-    default="django.core.mail.backends.console.EmailBackend",
-)
-EMAIL_HOST = env.str("EMAIL_HOST", default="")
-EMAIL_PORT = env.int("EMAIL_PORT", default=587)
-EMAIL_HOST_USER = env.str("EMAIL_HOST_USER", default="")
-EMAIL_HOST_PASSWORD = env.str("EMAIL_HOST_PASSWORD", default="")
-EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=True)
-DEFAULT_FROM_EMAIL = env.str("DEFAULT_FROM_EMAIL", default="webmaster@localhost")
+    "EMAIL_BACKEND", default="django.core.mail.backends.console.EmailBackend"
+)  # nuevo
+EMAIL_HOST = env.str("EMAIL_HOST", default="")  # nuevo
+EMAIL_PORT = env.int("EMAIL_PORT", default=465)  # nuevo
+EMAIL_USE_SSL = env.bool("EMAIL_USE_SSL", default=True)  # nuevo
+EMAIL_HOST_USER = env.str("EMAIL_HOST_USER", default="")  # nuevo
+EMAIL_HOST_PASSWORD = env.str("EMAIL_HOST_PASSWORD", default="")  # nuevo
+EMAIL_TIMEOUT = 10  # nuevo
+DEFAULT_FROM_EMAIL = env.str(
+    "DEFAULT_FROM_EMAIL", default="Periódico <no-responder@localhost>"
+)  # nuevo
+SERVER_EMAIL = DEFAULT_FROM_EMAIL  # nuevo
