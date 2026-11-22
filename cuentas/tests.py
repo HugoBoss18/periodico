@@ -1,4 +1,6 @@
 # cuentas/tests.py
+import re
+
 from django.contrib.auth import get_user_model
 from django.core import mail
 from django.urls import reverse
@@ -111,9 +113,57 @@ class PruebasContrasena(TestCase):
         self.assertEqual(mail.outbox[0].to, ["ana@ejemplo.mx"])
         self.assertIn("/cuentas/reset/", mail.outbox[0].body)
 
+    def test_reinicio_abre_formulario_de_nueva_contrasena(self):
+        respuesta = self.client.post(
+            reverse("password_reset"), {"email": "ana@ejemplo.mx"}
+        )
+        self.assertRedirects(respuesta, reverse("password_reset_done"))
+
+        coincidencia = re.search(r"/cuentas/reset/[^\s]+", mail.outbox[0].body)
+        self.assertIsNotNone(coincidencia)
+        enlace = coincidencia.group(0)
+
+        respuesta = self.client.get(enlace, follow=True)
+        self.assertContains(respuesta, "Escribe tu nueva contraseña")
+
+    def test_reinicio_rechaza_enlace_falso(self):
+        respuesta = self.client.get("/cuentas/reset/NQ/enlace-falso/")
+        self.assertContains(respuesta, "Enlace no válido")
+
     def test_reinicio_correo_desconocido(self):
         respuesta = self.client.post(
             reverse("password_reset"), {"email": "nadie@ejemplo.mx"}
         )
         self.assertRedirects(respuesta, reverse("password_reset_done"))
         self.assertEqual(len(mail.outbox), 0)
+
+    def test_reinicio_completa_cambio_contrasena(self):
+        respuesta = self.client.post(
+            reverse("password_reset"), {"email": "ana@ejemplo.mx"}
+        )
+        self.assertRedirects(respuesta, reverse("password_reset_done"))
+
+        coincidencia = re.search(r"/cuentas/reset/([^/]+)/([^/]+)/", mail.outbox[0].body)
+        self.assertIsNotNone(coincidencia)
+        uid, token = coincidencia.groups()
+
+        confirmacion = self.client.get(
+            reverse("password_reset_confirm", kwargs={"uidb64": uid, "token": token}),
+            follow=True,
+        )
+        self.assertEqual(confirmacion.status_code, 200)
+        self.assertTemplateUsed(confirmacion, "registration/password_reset_confirm.html")
+
+        respuesta = self.client.post(
+            reverse(
+                "password_reset_confirm",
+                kwargs={"uidb64": uid, "token": "set-password"},
+            ),
+            {
+                "new_password1": "Nueva-clave-2026",
+                "new_password2": "Nueva-clave-2026",
+            },
+        )
+        self.assertRedirects(respuesta, reverse("password_reset_complete"))
+        self.usuario.refresh_from_db()
+        self.assertTrue(self.usuario.check_password("Nueva-clave-2026"))

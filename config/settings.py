@@ -138,10 +138,20 @@ AUTH_USER_MODEL = "cuentas.UsuarioPersonalizado" #para indicar que se usará el 
 LOGIN_URL = "login" #para indicar la url a la que se redirigirá al usuario después de iniciar sesión
 LOGIN_REDIRECT_URL = "inicio" #para indicar la url a la que se redirigirá al usuario después de iniciar sesión
 LOGOUT_REDIRECT_URL = "inicio" #para indicar la url a la que se redirigirá al usuario después de cerrar sesión
+PASSWORD_RESET_TIMEOUT = 3600
 
 CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[])
 
 CRISPY_ALLOW_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_BACKEND = env.str(
+    "EMAIL_BACKEND",
+    default="django.core.mail.backends.console.EmailBackend",
+)
+EMAIL_HOST = env.str("EMAIL_HOST", default="")
+EMAIL_PORT = env.int("EMAIL_PORT", default=587)
+EMAIL_HOST_USER = env.str("EMAIL_HOST_USER", default="")
+EMAIL_HOST_PASSWORD = env.str("EMAIL_HOST_PASSWORD", default="")
+EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=True)
+DEFAULT_FROM_EMAIL = env.str("DEFAULT_FROM_EMAIL", default="webmaster@localhost")
