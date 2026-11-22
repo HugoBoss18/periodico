@@ -2,6 +2,7 @@
 from django.urls import path
 
 from .views import (
+    VistaComentar,
     VistaCrearArticulo,
     VistaDetalleArticulo,
     VistaEditarArticulo,
@@ -17,4 +18,5 @@ urlpatterns = [
     path("<int:pk>/", VistaDetalleArticulo.as_view(), name="articulo_detalle"),
     path("<int:pk>/editar/", VistaEditarArticulo.as_view(), name="articulo_editar"),
     path("<int:pk>/eliminar/", VistaEliminarArticulo.as_view(), name="articulo_eliminar"),
+    path("<int:pk>/comentar/", VistaComentar.as_view(), name="articulo_comentar"),
 ]
