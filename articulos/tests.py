@@ -83,3 +83,59 @@ class PruebasArticulos(TestCase):
         )
         self.assertRedirects(respuesta, reverse("articulo_lista"))
         self.assertFalse(Articulo.objects.filter(pk=self.articulo.pk).exists())
+
+    def test_usuario_staff_puede_editar_cualquier_articulo(self):
+        Usuario = get_user_model()
+        editor = Usuario.objects.create_user(
+            username="editor",
+            email="editor@ejemplo.mx",
+            password="Clave-segura-2026",
+            is_staff=True,
+        )
+        self.client.force_login(editor)
+
+        respuesta = self.client.post(
+            reverse("articulo_editar", args=[self.articulo.pk]),
+            {"titulo": "Editado por el editor", "cuerpo": "Texto corregido."},
+        )
+
+        self.assertRedirects(respuesta, self.articulo.get_absolute_url())
+        self.articulo.refresh_from_db()
+        self.assertEqual(self.articulo.titulo, "Editado por el editor")
+
+    def test_usuario_staff_puede_eliminar_cualquier_articulo(self):
+        Usuario = get_user_model()
+        editor = Usuario.objects.create_user(
+            username="editor",
+            email="editor@ejemplo.mx",
+            password="Clave-segura-2026",
+            is_staff=True,
+        )
+        self.client.force_login(editor)
+
+        respuesta = self.client.post(
+            reverse("articulo_eliminar", args=[self.articulo.pk])
+        )
+
+        self.assertRedirects(respuesta, reverse("articulo_lista"))
+        self.assertFalse(Articulo.objects.filter(pk=self.articulo.pk).exists())
+
+    def test_mis_articulos_requiere_sesion(self):
+        respuesta = self.client.get(reverse("articulo_mios"))
+        self.assertRedirects(
+            respuesta, f"{reverse('login')}?next={reverse('articulo_mios')}"
+        )
+
+    def test_mis_articulos_muestra_solo_articulos_del_usuario(self):
+        Articulo.objects.create(
+            titulo="Artículo ajeno",
+            cuerpo="Texto ajeno.",
+            autor=self.otro,
+        )
+        self.client.force_login(self.autora)
+
+        respuesta = self.client.get(reverse("articulo_mios"))
+
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertContains(respuesta, "Un buen título")
+        self.assertNotContains(respuesta, "Artículo ajeno")

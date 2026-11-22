@@ -7,11 +7,13 @@ from .views import (
     VistaEditarArticulo,
     VistaEliminarArticulo,
     VistaListaArticulos,
+    VistaMisArticulos,
 )
 
 urlpatterns = [
     path("", VistaListaArticulos.as_view(), name="articulo_lista"),
     path("nuevo/", VistaCrearArticulo.as_view(), name="articulo_nuevo"),
+    path("mios/", VistaMisArticulos.as_view(), name="articulo_mios"),
     path("<int:pk>/", VistaDetalleArticulo.as_view(), name="articulo_detalle"),
     path("<int:pk>/editar/", VistaEditarArticulo.as_view(), name="articulo_editar"),
     path("<int:pk>/eliminar/", VistaEliminarArticulo.as_view(), name="articulo_eliminar"),

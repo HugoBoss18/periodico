@@ -6,6 +6,9 @@
 {% block contenido %}
   <div class="p-5 mb-4 bg-body-tertiary rounded-3">
     <h1 class="display-5 fw-bold">Periódico</h1>
+    <a class="btn btn-primary btn-lg" href="{% url 'articulo_lista' %}">
+      Leer los artículos
+    </a>
     {% if user.is_authenticated %}
       <p class="fs-4">Hola, {{ user.username }}. Que bueno verte de nuevo.</p>
     {% else %}

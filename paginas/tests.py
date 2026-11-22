@@ -13,3 +13,7 @@ class PruebasPaginaInicio(SimpleTestCase):
         self.assertEqual(respuesta.status_code, 200)
         self.assertTemplateUsed(respuesta, "inicio.html")
         self.assertContains(respuesta, "Periódico")
+
+    def test_inicio_tiene_boton_para_leer_articulos(self):
+        respuesta = self.client.get(reverse("inicio"))
+        self.assertContains(respuesta, "Leer los artículos")
