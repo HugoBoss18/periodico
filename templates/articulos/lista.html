@@ -15,6 +15,9 @@
           Por {{ articulo.autor.username }} · {{ articulo.fecha|date:"j \d\e F \d\e Y"|lower }}
         </p>
         <p class="card-text">{{ articulo.cuerpo|truncatewords:30 }}</p>
+        <p class="small text-body-secondary mb-0">
+          {{ articulo.comentarios.count }} comentario{{ articulo.comentarios.count|pluralize:"s" }}
+        </p>
       </div>
     </div>
   {% empty %}

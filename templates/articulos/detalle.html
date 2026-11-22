@@ -20,14 +20,24 @@
     </div>
   {% endif %}
 
-  <section class="mb-4">
+  <section id="comentarios" class="mb-4">
     <h2 class="h5">Comentarios ({{ articulo.comentarios.count }})</h2>
     {% for comentario in articulo.comentarios.all %}
       <div class="border-start border-3 ps-3 mb-3">
         <p class="mb-1">{{ comentario.comentario }}</p>
         <p class="small text-body-secondary mb-0">
-          {{ comentario.autor.username }} · {{ comentario.fecha|date:"j \d\e F, H:i"|lower }}
+          {{ comentario.autor.username }}
+          {% if comentario.autor == articulo.autor %}
+            <span class="badge text-bg-primary ms-1">Autor</span>
+          {% endif %}
+          · {{ comentario.fecha|date:"j \d\e F, H:i"|lower }}
         </p>
+        {% if user == comentario.autor %}
+          <form action="{% url 'comentario_eliminar' comentario.pk %}" method="post" class="mt-2">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-sm btn-outline-danger">Eliminar comentario</button>
+          </form>
+        {% endif %}
       </div>
     {% empty %}
       <p class="text-body-secondary">Todavía no hay comentarios.</p>

@@ -152,7 +152,10 @@ class PruebasArticulos(TestCase):
             reverse("articulo_comentar", args=[self.articulo.pk]),
             {"comentario": "Excelente artículo."},
         )
-        self.assertRedirects(respuesta, self.articulo.get_absolute_url())
+        self.assertRedirects(
+            respuesta,
+            f"{self.articulo.get_absolute_url()}#comentarios",
+        )
         comentario = Comentario.objects.get()
         self.assertEqual(comentario.articulo, self.articulo)
         self.assertEqual(comentario.autor, self.otro)
@@ -213,7 +216,10 @@ class PruebasComentarios(TestCase):
     def test_comentar(self):
         self.client.force_login(self.autora)
         respuesta = self.client.post(self.url_comentar, {"comentario": "¡Gracias!"})
-        self.assertRedirects(respuesta, self.articulo.get_absolute_url())
+        self.assertRedirects(
+            respuesta,
+            f"{self.articulo.get_absolute_url()}#comentarios",
+        )
         nuevo = Comentario.objects.get(comentario="¡Gracias!")
         self.assertEqual(nuevo.autor, self.autora)
         self.assertEqual(nuevo.articulo, self.articulo)
@@ -229,3 +235,49 @@ class PruebasComentarios(TestCase):
         self.client.force_login(self.autora)
         respuesta = self.client.get(self.url_comentar)
         self.assertEqual(respuesta.status_code, 405)
+
+    def test_comentario_autor_del_articulo_muestra_etiqueta(self):
+        comentario = Comentario.objects.create(
+            articulo=self.articulo,
+            comentario="Comentario del autor.",
+            autor=self.autora,
+        )
+        respuesta = self.client.get(self.articulo.get_absolute_url())
+        self.assertContains(respuesta, "Comentario del autor.")
+        self.assertContains(respuesta, "badge")
+        self.assertContains(respuesta, "Autor")
+        comentario.delete()
+
+    def test_lista_muestra_numero_de_comentarios(self):
+        respuesta = self.client.get(reverse("articulo_lista"))
+        self.assertContains(respuesta, "1 comentario")
+
+    def test_autor_puede_eliminar_comentario(self):
+        self.client.force_login(self.lector)
+        respuesta = self.client.post(
+            reverse("comentario_eliminar", args=[self.comentario.pk])
+        )
+        self.assertRedirects(
+            respuesta,
+            f"{self.articulo.get_absolute_url()}#comentarios",
+        )
+        self.assertFalse(Comentario.objects.filter(pk=self.comentario.pk).exists())
+
+    def test_otro_usuario_no_puede_eliminar_comentario(self):
+        self.client.force_login(self.autora)
+        respuesta = self.client.post(
+            reverse("comentario_eliminar", args=[self.comentario.pk])
+        )
+        self.assertEqual(respuesta.status_code, 403)
+        self.assertTrue(Comentario.objects.filter(pk=self.comentario.pk).exists())
+
+    def test_comentar_redirige_a_seccion_comentarios(self):
+        self.client.force_login(self.lector)
+        respuesta = self.client.post(
+            self.url_comentar,
+            {"comentario": "Nuevo comentario."},
+        )
+        self.assertRedirects(
+            respuesta,
+            f"{self.articulo.get_absolute_url()}#comentarios",
+        )

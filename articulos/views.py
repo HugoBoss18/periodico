@@ -91,3 +91,17 @@ class VistaComentar(LoginRequiredMixin, CreateView):  # nuevo
         form.instance.articulo = self.articulo
         form.instance.autor = self.request.user
         return super().form_valid(form)
+
+    def get_success_url(self):
+        return f"{self.articulo.get_absolute_url()}#comentarios"
+
+
+class VistaEliminarComentario(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = Comentario
+    http_method_names = ["post"]
+
+    def test_func(self):
+        return self.get_object().autor == self.request.user
+
+    def get_success_url(self):
+        return f"{self.object.articulo.get_absolute_url()}#comentarios"
